@@ -11,6 +11,7 @@ export interface Task {
   title: string;
   description?: string;
   dueDate?: Date;
+  dueTime?: string; // HH:mm format
   isEveryday?: boolean;
   targetDuration?: number; // Target duration in seconds
   priority: 'Low' | 'Medium' | 'High';
@@ -50,6 +51,12 @@ db.version(1).stores({
 
 db.version(2).stores({
   tasks: 'id, dueDate, priority, completed, isEveryday, createdAt',
+  notes: 'id, taskId, createdAt',
+  timeLogs: 'id, taskId, startTime, createdAt'
+});
+
+db.version(3).stores({
+  tasks: 'id, dueDate, dueTime, priority, completed, isEveryday, createdAt',
   notes: 'id, taskId, createdAt',
   timeLogs: 'id, taskId, startTime, createdAt'
 });

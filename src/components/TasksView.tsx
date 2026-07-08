@@ -14,6 +14,7 @@ export function TasksView() {
   
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [dueDate, setDueDate] = useState('');
+  const [dueTime, setDueTime] = useState('');
   const [isEveryday, setIsEveryday] = useState(false);
   const [targetDurationMinutes, setTargetDurationMinutes] = useState('');
 
@@ -39,6 +40,7 @@ export function TasksView() {
       title: newTaskTitle,
       priority,
       dueDate: parsedDate,
+      dueTime: dueTime || undefined,
       isEveryday,
       targetDuration: duration,
       completed: false,
@@ -47,6 +49,7 @@ export function TasksView() {
     });
     setNewTaskTitle('');
     setDueDate('');
+    setDueTime('');
     setIsEveryday(false);
     setTargetDurationMinutes('');
     setShowAdvanced(false);
@@ -90,7 +93,7 @@ export function TasksView() {
             className="text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-1"
           >
             {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            {showAdvanced ? 'Hide options' : 'More options (Schedule, Timer)'}
+            {showAdvanced ? 'Hide options' : 'More options (Schedule, Time, Timer)'}
           </button>
         </div>
 
@@ -102,7 +105,7 @@ export function TasksView() {
               exit={{ height: 0, opacity: 0 }}
               className="overflow-hidden flex flex-wrap gap-4 pt-2 border-t border-white/10"
             >
-              <div className="flex-1 min-w-[200px]">
+              <div className="flex-1 min-w-[150px]">
                 <label className="block text-xs text-gray-400 mb-1 flex items-center gap-1"><CalendarIcon className="w-3 h-3" /> Scheduled Date</label>
                 <input 
                   type="date" 
@@ -110,6 +113,16 @@ export function TasksView() {
                   onChange={(e) => setDueDate(e.target.value)}
                   disabled={isEveryday}
                   className="glass-input w-full px-3 py-2 text-sm disabled:opacity-50"
+                />
+              </div>
+
+              <div className="flex-1 min-w-[120px]">
+                <label className="block text-xs text-gray-400 mb-1 flex items-center gap-1"><Clock className="w-3 h-3" /> Scheduled Time</label>
+                <input 
+                  type="time" 
+                  value={dueTime}
+                  onChange={(e) => setDueTime(e.target.value)}
+                  className="glass-input w-full px-3 py-2 text-sm"
                 />
               </div>
               
@@ -129,8 +142,8 @@ export function TasksView() {
                 </label>
               </div>
 
-              <div className="flex-1 min-w-[200px]">
-                <label className="block text-xs text-gray-400 mb-1 flex items-center gap-1"><Clock className="w-3 h-3" /> Focus Timer (minutes)</label>
+              <div className="flex-1 min-w-[150px]">
+                <label className="block text-xs text-gray-400 mb-1 flex items-center gap-1"><Clock className="w-3 h-3" /> Focus Timer (min)</label>
                 <input 
                   type="number" 
                   min="1"
@@ -199,6 +212,14 @@ function TaskItem({ task }: { task: Task }) {
     return `${m}m ${s}s`;
   };
 
+  const formatTimeStr = (timeStr?: string) => {
+    if (!timeStr) return '';
+    const [h, m] = timeStr.split(':');
+    const date = new Date();
+    date.setHours(parseInt(h, 10), parseInt(m, 10));
+    return format(date, 'h:mm a');
+  };
+
   const displaySeconds = isActive && targetDuration !== null
     ? Math.max(0, targetDuration - elapsedSeconds)
     : (isActive ? elapsedSeconds : (task.targetDuration || 0));
@@ -251,12 +272,17 @@ function TaskItem({ task }: { task: Task }) {
             </span>
             {task.isEveryday && (
               <span className="px-2 py-0.5 rounded-full text-xs border border-purple-500/50 text-purple-400 flex items-center gap-1">
-                <Repeat className="w-3 h-3" /> Everyday
+                <Repeat className="w-3 h-3" /> Everyday {task.dueTime ? `at ${formatTimeStr(task.dueTime)}` : ''}
               </span>
             )}
             {task.dueDate && !task.isEveryday && (
               <span className="px-2 py-0.5 rounded-full text-xs border border-gray-500/50 text-gray-400 flex items-center gap-1">
-                <CalendarIcon className="w-3 h-3" /> {format(task.dueDate, 'MMM d')}
+                <CalendarIcon className="w-3 h-3" /> {format(task.dueDate, 'MMM d')} {task.dueTime ? `at ${formatTimeStr(task.dueTime)}` : ''}
+              </span>
+            )}
+            {!task.dueDate && !task.isEveryday && task.dueTime && (
+              <span className="px-2 py-0.5 rounded-full text-xs border border-gray-500/50 text-gray-400 flex items-center gap-1">
+                <Clock className="w-3 h-3" /> Today at {formatTimeStr(task.dueTime)}
               </span>
             )}
             {task.targetDuration && (
