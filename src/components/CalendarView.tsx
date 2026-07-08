@@ -23,7 +23,11 @@ export function CalendarView() {
   const getDayStats = (date: Date) => {
     if (!tasks || !timeLogs) return { taskCount: 0, timeSpent: 0 };
     
-    const dayTasks = tasks.filter(t => isSameDay(t.createdAt, date) || (t.dueDate && isSameDay(t.dueDate, date)));
+    const dayTasks = tasks.filter(t => 
+      t.isEveryday || 
+      isSameDay(t.createdAt, date) || 
+      (t.dueDate && isSameDay(t.dueDate, date))
+    );
     const dayLogs = timeLogs.filter(l => isSameDay(l.startTime, date));
     
     const timeSpent = dayLogs.reduce((acc, log) => acc + (log.duration || 0), 0);

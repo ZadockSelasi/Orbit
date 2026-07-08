@@ -11,6 +11,8 @@ export interface Task {
   title: string;
   description?: string;
   dueDate?: Date;
+  isEveryday?: boolean;
+  targetDuration?: number; // Target duration in seconds
   priority: 'Low' | 'Medium' | 'High';
   completed: boolean;
   subtasks: SubTask[];
@@ -42,6 +44,12 @@ const db = new Dexie('ProductivitySuiteDB') as Dexie & {
 
 db.version(1).stores({
   tasks: 'id, dueDate, priority, completed, createdAt',
+  notes: 'id, taskId, createdAt',
+  timeLogs: 'id, taskId, startTime, createdAt'
+});
+
+db.version(2).stores({
+  tasks: 'id, dueDate, priority, completed, isEveryday, createdAt',
   notes: 'id, taskId, createdAt',
   timeLogs: 'id, taskId, startTime, createdAt'
 });
